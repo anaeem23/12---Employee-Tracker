@@ -22,7 +22,7 @@ const introQ =
       type: "list",
       message: "Please pick one",
       name: "options",
-      choices: ["View All Departments","View All Roles","View All Employees","Add a Department","Add a Role","Add an Employee","Update an Employee Role","Done"]
+      choices: ["View All Departments","View All Roles","View All Employees","Add a Department","Add a Role","Add an Employee","Update an Employee's Role","Done"]
     }
   ;
 
@@ -85,6 +85,19 @@ const employeeAddQ = [
   },
 ];
 
+const employeeUpdate = [
+  {
+    type:'input',
+    message:'Please enter Employee ID',
+    name:'employeeName'
+  },
+  {
+    type:'input',
+    message:'Please enter new role id',
+    name:'employeeid'
+  }
+]
+
 function init() {
   inquirer.prompt(introQ).then((response) => {
 
@@ -112,7 +125,7 @@ function init() {
       addEmployee();
     };
 
-    if (response.options === "Update an Employee") {
+    if (response.options === "Update an Employee's Role") {
       updateEmployee();
     };
 
@@ -146,9 +159,49 @@ function viewRoles() {
 }
 
 function viewEmployees() {
-  db.query(" select first_name as 'First Name', role_1.title as 'Job Role', role_1.salary as Salary from Employee join role_1 on Employee.role_id = role_1.id;", function(err,results) {
+  db.query("select Employee.id as ID, first_name as 'First Name', last_name as 'Last Name', role_1.title as 'Job Role', role_1.salary as Salary from Employee join role_1 on Employee.role_id = role_1.id;", function(err,results) {
     console.table(results);
     init()
+  })
+}
+
+function addDepartment() {
+
+  inquirer.prompt(departmentQ).then((input) => {
+  db.query(`insert into department (name) values(?)`,input.department,function(err,results) {
+    console.log('ADDED!')
+    init()
+  })
+})
+
+}
+
+function addRole() {
+
+  inquirer.prompt(roleQ).then((input) => {
+    db.query('insert into role_1 (title,salary,department_id) values(?,?,?);',[input.roleName,input.roleSalary,input.roleDepartment], function(err,results) {
+      console.log('ADDED!')
+      init()
+    })
+  })
+
+}
+
+function addEmployee() {
+  inquirer.prompt(employeeAddQ).then((input) => {
+    db.query('insert into Employee (first_name,last_name,role_id,manager_id) values(?,?,?,?);',[input.employeeFirst,input.employeeLast,input.employeeRole,input.employeeManager], function(err,results) {
+      console.log('ADDED!')
+      init()
+    })
+  })
+}
+
+function updateEmployee() {
+  inquirer.prompt(employeeUpdate).then((input) => {
+    db.query('update Employee set role_id=? where id=?;', [input.employeeid,input.employeeName], function(err, results) {
+      console.log('ADDED!')
+      init()
+    })
   })
 }
 
